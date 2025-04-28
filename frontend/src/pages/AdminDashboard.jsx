@@ -21,7 +21,7 @@ export default function AdminDashboard() {
 
   const carregarProdutos = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/produtos");
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/produtos`);
       setProdutos(response.data);
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
 
   const handleAtivarDesativar = async (id) => {
     try {
-      await axios.patch(`http://localhost:8000/produtos/${id}/ativar`);
+      await axios.patch(`${import.meta.env.VITE_API_URL}/produtos/${id}/ativar`);
 
       // Atualiza apenas o produto alterado localmente:
       setProdutos((prevProdutos) =>
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
                 onClick={async () => {
                   if (confirm("Deseja realmente excluir?")) {
                     try {
-                      await axios.delete(`http://localhost:8000/produtos/${produto.id}`);
+                      await axios.delete(`https://ruach-production.up.railway.app/produtos/${produto.id}`);
                       carregarProdutos();
                     } catch (error) {
                       console.error("Erro ao excluir:", error);

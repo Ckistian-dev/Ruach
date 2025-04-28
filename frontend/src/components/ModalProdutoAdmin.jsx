@@ -22,9 +22,9 @@ export default function ModalProdutoAdmin({ produto, onClose }) {
 
     try {
       if (isEditando) {
-        await axios.put(`http://localhost:8000/produtos/${produto.id}`, form);
+        await axios.put(`${import.meta.env.VITE_API_URL}/produtos/${produto.id}`, form);
       } else {
-        await axios.post("http://localhost:8000/produtos", form);
+        await axios.post(`${import.meta.env.VITE_API_URL}/produtos`, form);
       }
       onClose();
     } catch (error) {

@@ -28,7 +28,7 @@ export default function Catalogo() {
   useEffect(() => {
     async function carregarProdutos() {
       try {
-        const resposta = await fetch('http://localhost:8000/produtos');
+        const resposta = await fetch(`${import.meta.env.VITE_API_URL}/produtos`);
         const data = await resposta.json();
         setProdutos(data);
 
