@@ -34,3 +34,12 @@ def excluir_produto(produto_id: int, db: Session = Depends(get_db)):
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     return {"detail": "Produto excluído com sucesso"}
+
+from schemas.produto_schema import ProdutoOrdemUpdate
+
+@router.post("/produtos/atualizar-ordem")
+def atualizar_ordem_produtos(lista_ordem: list[ProdutoOrdemUpdate], db: Session = Depends(get_db)):
+    if not lista_ordem:
+        raise HTTPException(status_code=400, detail="Lista de produtos vazia")
+    return produto_controller.atualizar_ordem_produtos(db, [item.dict() for item in lista_ordem])
+

@@ -26,3 +26,8 @@ class ProdutoResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+class ProdutoOrdemUpdate(BaseModel):
+    id: int
+    ordem: int
+
