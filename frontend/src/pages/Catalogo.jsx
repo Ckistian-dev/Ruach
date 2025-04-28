@@ -148,7 +148,7 @@ export default function Catalogo() {
               </div>
 
               {/* Informações */}
-              <div className="flex flex-col mt-[-20px] mb-2">
+              <div className="flex flex-col mb-2">
                 <span className="text-xl font-bold text-[#561c1c]">
                   R$ {produto.valor?.toFixed(2).replace('.', ',')}
                 </span>

@@ -50,30 +50,36 @@ export default function AdminDashboard() {
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 200,    // Segurar 200ms antes de arrastar
+        tolerance: 5,  // Pode mexer até 5px antes de considerar um arraste
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
+
   async function handleDragEnd(event) {
     const { active, over } = event;
-  
+
     if (active.id !== over.id) {
       setProdutos((produtos) => {
         const oldIndex = produtos.findIndex((p) => p.id === active.id);
         const newIndex = produtos.findIndex((p) => p.id === over.id);
         const novoArray = arrayMove(produtos, oldIndex, newIndex);
-  
+
         // 🔥 Chamar a função para salvar a nova ordem no backend
         salvarNovaOrdem(novoArray);
-  
+
         return novoArray;
       });
     }
   }
 
-  
+
   async function salvarNovaOrdem(produtosOrdenados) {
     try {
       // Mapeia os produtos para enviar apenas id e nova ordem
@@ -81,15 +87,15 @@ export default function AdminDashboard() {
         id: produto.id,
         ordem: index + 1, // começa do 1
       }));
-  
+
       await axios.post(`${import.meta.env.VITE_API_URL}/produtos/atualizar-ordem`, produtosParaAtualizar);
-  
+
       console.log("Nova ordem salva com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar nova ordem:", error);
     }
   }
-  
+
 
   return (
     <div className="p-6 min-h-screen bg-gradient-to-b from-gray-50 to-red-50">
@@ -183,20 +189,24 @@ function SortableItem({ produto, setModalAberto, setProdutoSelecionado, handleAt
 
       <div className="flex justify-center mb-2">
         <button
-          onClick={() => handleAtivarDesativar(produto.id)}
-          className={`w-full py-2 rounded-full font-semibold transition duration-300 ${
-            produto.ativo
-              ? "bg-green-500 hover:bg-green-600 text-white"
-              : "bg-gray-400 hover:bg-gray-500 text-white"
-          }`}
+          onClick={(e) => {
+            e.stopPropagation(); // 👈 Impede que o clique ative o drag
+            handleAtivarDesativar(produto.id);
+          }}
+          className={`w-full py-2 rounded-full font-semibold transition duration-300 ${produto.ativo
+            ? "bg-green-500 hover:bg-green-600 text-white"
+            : "bg-gray-400 hover:bg-gray-500 text-white"
+            }`}
         >
           {produto.ativo ? "Ativo" : "Inativo"}
         </button>
+
       </div>
 
       <div className="flex gap-4">
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation(); // 👈 Impede que o clique ative o drag
             setProdutoSelecionado(produto);
             setModalAberto(true);
           }}
@@ -204,8 +214,10 @@ function SortableItem({ produto, setModalAberto, setProdutoSelecionado, handleAt
         >
           Editar
         </button>
+
         <button
-          onClick={async () => {
+          onClick={async (e) => {
+            e.stopPropagation(); // 👈 Impede que o clique ative o drag
             if (confirm("Deseja realmente excluir?")) {
               try {
                 await axios.delete(`${import.meta.env.VITE_API_URL}/produtos/${produto.id}`);
@@ -219,6 +231,7 @@ function SortableItem({ produto, setModalAberto, setProdutoSelecionado, handleAt
         >
           Excluir
         </button>
+
       </div>
     </div>
   );
