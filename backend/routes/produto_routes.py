@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from database import get_db
 from controllers import produto_controller
@@ -38,7 +38,7 @@ def excluir_produto(produto_id: int, db: Session = Depends(get_db)):
 from schemas.produto_schema import ProdutoOrdemUpdate
 
 @router.post("/produtos/atualizar-ordem")
-def atualizar_ordem_produtos(lista_ordem: list[ProdutoOrdemUpdate], db: Session = Depends(get_db)):
+def atualizar_ordem_produtos(lista_ordem: list[ProdutoOrdemUpdate] = Body(...), db: Session = Depends(get_db)):
     if not lista_ordem:
         raise HTTPException(status_code=400, detail="Lista de produtos vazia")
     return produto_controller.atualizar_ordem_produtos(db, [item.dict() for item in lista_ordem])
