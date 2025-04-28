@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useCarrinho } from "../context/CarrinhoContext";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from 'react-toastify';
 
 const ORS_API_KEY = import.meta.env.VITE_ORS_API_KEY;
+const PIX_CODIGO = "52764726000102";
 
 export default function FinalizarPedido() {
     const { carrinho, esvaziarCarrinho } = useCarrinho();
@@ -133,7 +135,7 @@ export default function FinalizarPedido() {
         }
     }, [form.cep, form.rua, form.numero, form.bairro, form.cidade, form.estado, tipoEntrega]);
 
-    const handleConfirmarPedido = () => {
+    const handleConfirmarPedido = async () => {
         if (!form.nome.trim()) {
             alert("Preencha seu nome!");
             return;
@@ -146,7 +148,6 @@ export default function FinalizarPedido() {
             alert("Selecione uma forma de pagamento!");
             return;
         }
-
 
         let mensagem = `🍽️ *Novo Pedido Recebido!* 🍽️\n\n`;
         mensagem += `👤 *Cliente:* ${form.nome}\n`;
@@ -169,7 +170,6 @@ export default function FinalizarPedido() {
             const valorNumerico = parseFloat(
                 trocoPara.replace("R$ ", "").replace(",", ".")
             );
-
             const trocoValor = valorNumerico - total;
             if (trocoValor > 0) {
                 mensagem += `💵 *Troco para:* R$ ${valorNumerico.toFixed(2).replace(".", ",")} (Troco: R$ ${trocoValor.toFixed(2).replace(".", ",")})\n`;
@@ -185,8 +185,15 @@ export default function FinalizarPedido() {
             }
         }
 
-        mensagem += `💳 *Forma de Pagamento:* ${pagamentoSelecionado.toUpperCase()}\n\n`;
-        mensagem += `🎉 *Agradecemos a preferência!*\n✨ *Seu pedido está sendo preparado com muito carinho!* ✨`;
+        mensagem += `💳 *Forma de Pagamento:* ${pagamentoSelecionado.toUpperCase()}\n`;
+
+        // Se for pagamento por PIX, adicionar informações adicionais
+        if (pagamentoSelecionado === "pix") {
+            mensagem += `\n🏦 *Chave PIX:* ${PIX_CODIGO}\n`;
+            mensagem += `📩 *Realize o pagamento e envie o comprovante por WhatsApp!*\n`;
+        }
+
+        mensagem += `\n🎉 *Agradecemos a preferência!*\n✨ *Seu pedido está sendo preparado com muito carinho!* ✨`;
 
         // Limpar o carrinho
         esvaziarCarrinho();
@@ -199,9 +206,6 @@ export default function FinalizarPedido() {
         const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
         window.open(url, "_blank");
     };
-
-
-
 
     return (
         <section className="min-h-screen pt-32 px-6 md:px-24 pb-24 bg-gradient-to-b from-white to-gray-100">
@@ -294,7 +298,41 @@ export default function FinalizarPedido() {
                         ].map((opcao) => (
                             <div
                                 key={opcao.id}
-                                onClick={() => setPagamentoSelecionado(opcao.id)}
+                                onClick={async () => {
+                                    setPagamentoSelecionado(opcao.id);
+                                    if (opcao.id === "pix") {
+                                        try {
+                                            await navigator.clipboard.writeText(PIX_CODIGO);
+                                            toast.success('Código PIX copiado!', {
+                                                icon: "✅",
+                                                style: {
+                                                    background: "#4ade80",  // fundo verde elegante
+                                                    color: "#ffffff",
+                                                    fontWeight: "600",
+                                                    fontSize: "14px",
+                                                    padding: "8px 16px",
+                                                    borderRadius: "8px",
+                                                    boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+                                                },
+                                            });
+                                        } catch (error) {
+                                            console.error("Erro ao copiar PIX:", error);
+                                            toast.error('Erro ao copiar código!', {
+                                                icon: "⚠️",
+                                                style: {
+                                                    background: "#f87171",
+                                                    color: "#ffffff",
+                                                    fontWeight: "600",
+                                                    fontSize: "14px",
+                                                    padding: "8px 16px",
+                                                    borderRadius: "8px",
+                                                    boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+                                                },
+                                            });
+                                        }
+                                    }
+                                }}
+
                                 className={`cursor-pointer flex-1 border-2 rounded-lg p-4 text-center font-semibold transition transform hover:scale-105 ${pagamentoSelecionado === opcao.id
                                     ? "border-[#561c1c] "
                                     : "border-gray-200"

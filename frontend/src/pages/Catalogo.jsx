@@ -58,9 +58,9 @@ export default function Catalogo() {
       <motion.div
         className="text-center mb-16"
         initial={{ opacity: 0, y: -30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -30 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <h2 className="text-4xl md:text-5xl font-extrabold leading-tight text-[#1a1a1a] mb-4">
           Descubra o <span className="text-red-600">Melhor</span> do Nosso <span className="text-red-600">Cardápio</span>!
@@ -76,29 +76,35 @@ export default function Catalogo() {
         <aside className="md:w-1/4 space-y-6">
           <AnimatePresence mode="wait">
             <motion.div
-              key={categorias.length} // 👈 reanima quando muda quantidade de categorias
-              initial={{ scaleY: 0.8 }}
-              animate={{ scaleY: 1 }}
-              exit={{ scaleY: 0.8 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="origin-top bg-[#561c1c] text-white rounded-2xl p-6 shadow-xl"
+              layout
+              layoutTransition={{ duration: 0.5, ease: "easeInOut" }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="origin-top bg-[#561c1c] text-white rounded-2xl p-6 shadow-xl transition-all duration-300"
             >
+
               <h3 className="text-2xl font-bold mb-6 text-center">Categorias</h3>
 
               {/* Botões */}
               <div className="flex flex-col gap-4">
-                {categorias.map((cat) => (
-                  <button
-                    key={cat}
-                    className={`w-full px-5 py-3 rounded-xl text-lg font-semibold transition-all duration-300 ${categoriaSelecionada === cat
-                        ? "bg-white text-[#561c1c] shadow-md"
-                        : "hover:bg-red-700 hover:text-white"
-                      }`}
+                {categorias.map((cat, index) => (
+                  <motion.button
+                    initial={false} // 👈 agora o botão não tem animação pesada
+                    animate={false}
+                    whileTap={{ scale: 0.97 }} // 👈 só um pequeno toque quando clicar
+                    whileHover={{ scale: 1.02 }} // 👈 levemente maior no hover
                     onClick={() => setCategoriaSelecionada(cat)}
+                    className={`w-full px-5 py-3 rounded-xl text-lg font-semibold ${categoriaSelecionada === cat
+                      ? "bg-white text-[#561c1c] shadow-md scale-105"
+                      : "hover:bg-red-700 hover:text-white"
+                      }`}
                   >
                     {cat}
-                  </button>
+                  </motion.button>
                 ))}
+
               </div>
             </motion.div>
           </AnimatePresence>

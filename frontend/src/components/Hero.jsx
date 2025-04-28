@@ -66,12 +66,15 @@ export default function Home() {
           >
             Ver Cardápio
           </Link>
-          <Link
-            to="/contato"
+          <a
+            href="https://wa.me/554591542767?text=Olá%2C%20gostaria%20de%20fazer%20um%20pedido!"
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-8 py-4 border-2 bg-white border-red-600 text-red-600 font-semibold rounded-full hover:bg-red-600 hover:text-white transition duration-300 text-lg shadow-lg"
           >
             Falar com a gente
-          </Link>
+          </a>
+
         </motion.div>
       </motion.section>
     </motion.div>
