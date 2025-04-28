@@ -3,7 +3,7 @@ import { MapPin, Instagram, Clock, Phone } from "lucide-react";
 
 export default function Contato() {
   return (
-    <section className="px-6 md:px-24 py-24 bg-gradient-to-b from-white to-gray-100">
+    <section className="px-6 md:px-24 py-24">
       <motion.div
         className="mb-16"
         initial={{ opacity: 0, y: -30 }}
