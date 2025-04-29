@@ -1,0 +1,317 @@
+[
+  {
+    "id": 1,
+    "nome": "Cigarrete de frango 120gr",
+    "descricao": "Cigarrete de frango 120gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/6571c22f558925a4e8898df3.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 2,
+    "nome": "Cigarrete de presunto e queijo 120gr",
+    "descricao": "Cigarrete de presunto e queijo 120gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/3.png.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 3,
+    "nome": "Esfirra de frango com requeijão 120gr",
+    "descricao": "Esfirra de frango com requeijão 120gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Esfiha-Aberta-Frango-Com-Requeijao-Oba.png.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 4,
+    "nome": "Bauru de calabresa cheddar 170gr",
+    "descricao": "Bauru de calabresa cheddar 170gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Bauru-de-frango-600x600-3.png.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 5,
+    "nome": "Bauru presunto e queijo 170gr",
+    "descricao": "Bauru presunto e queijo 170gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Bauru-de-frango-600x600-3.png.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 6,
+    "nome": "Pastel de nata bovino 170gr",
+    "descricao": "Pastel de nata bovino 170gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/IND-PASTEL-ASSADO-100G-FGO.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 7,
+    "nome": "Pão de batata calabresa c/ requeijão 120gr",
+    "descricao": "Pão de batata calabresa c/ requeijão 120gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/43745.jpg.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 8,
+    "nome": "Pão de batata com frango cremoso 120gr",
+    "descricao": "Pão de batata com frango cremoso 120gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/43745.jpg.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 9,
+    "nome": "Pastel de nata frango cremoso c/ requeijão 170gr",
+    "descricao": "Pastel de nata frango cremoso c/ requeijão 170gr",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/IND-PASTEL-ASSADO-100G-FGO.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 10,
+    "nome": "Suco del valle frutas cítricas 450ml",
+    "descricao": "Suco del valle frutas cítricas 450ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/8a20fc44b2384d61d294e831901587d0.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 11,
+    "nome": "Suco del valle laranja 450ml",
+    "descricao": "Suco del valle laranja 450ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/474f7848-560e-4934-8d0b-b08b3df2bdc9.png",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 12,
+    "nome": "Suco del valle uva 450ml",
+    "descricao": "Suco del valle uva 450ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/114585_COCA_PAI.png",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 13,
+    "nome": "Sprite lemon fresh 510ml",
+    "descricao": "Sprite lemon fresh 510ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/SKUs-Ecommerce-1000-x-1000-px-1-.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 14,
+    "nome": "Kapo abacaxi 200ml",
+    "descricao": "Kapo abacaxi 200ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/bebida-adocada-abacaxi-del-valle-kapo-caixa-200ml_603.webp",
+    "valor": 3,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 15,
+    "nome": "Kapo laranja 200ml",
+    "descricao": "Kapo laranja 200ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/SUCO-KAPO-LARANJA-200ML.webp",
+    "valor": 3,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 16,
+    "nome": "Kapo uva 200ml",
+    "descricao": "Kapo uva 200ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Del-Valle-Kapo-Uva-200Ml-113046_COCA_1.webp",
+    "valor": 3,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 17,
+    "nome": "Powerade mix de frutas 500ml",
+    "descricao": "Powerade mix de frutas 500ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/isot_nico_powerade_squeeze_mix_de_frutas_500ml.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 18,
+    "nome": "Powerade uva 500ml",
+    "descricao": "Powerade uva 500ml",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Powerade-Uva-500Ml-Pet-113246_COCA_PAI.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 19,
+    "nome": "Powerade tangerina 500ml",
+    "descricao": "Powerade sabor tangerina em garrafa de 500ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Powerade-Tangerina-500ml-Pet-113250_COCA_PAI.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 20,
+    "nome": "Água com gás 500ml",
+    "descricao": "Água mineral Crystal com gás em garrafa de 500ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/agua-mineral-com-gas-crystal-500ml-1-1024x1024.webp",
+    "valor": 3,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 21,
+    "nome": "Água sem gás 500ml",
+    "descricao": "Água mineral Crystal sem gás em garrafa de 500ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/agua-mineral-sem-gas-crystal-500ml-1-1024x1024.webp",
+    "valor": 3,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 22,
+    "nome": "Fanta laranja pet 290ml",
+    "descricao": "Fanta sabor laranja em garrafa PET de 290ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/0029s_0005_fanta-laranja-290ml.jpg",
+    "valor": 4,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 23,
+    "nome": "Coca Cola pet 290ml",
+    "descricao": "Coca-Cola em garrafa PET de 290ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/b7efbad4e84391f4bfb7fdfb1f333f85.jpg",
+    "valor": 4,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 24,
+    "nome": "Schweppes tônica 350ml",
+    "descricao": "Schweppes água tônica tradicional em lata de 350ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Schweppes-Tonica-350ml.png",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 25,
+    "nome": "Schwepppes sem açúcar 350ml",
+    "descricao": "Schweppes água tônica sem açúcar em lata de 350ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/aba94f21-3975-4a85-abd0-84b0c96739e4.jpeg",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 26,
+    "nome": "Fanta guaraná 350ml",
+    "descricao": "Fanta sabor guaraná em lata de 350ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Fanta-Guarana-350ml.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 27,
+    "nome": "Fanta uva 350ml",
+    "descricao": "Fanta sabor uva em lata de 350ml.",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Fanta-Uva-350ml.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 28,
+    "nome": "Fanta laranja 350ml",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Fanta-Laranja-350ml.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 29,
+    "nome": "Coca Cola 350ml",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/SKUs-Ecommerce-1000-x-1000-px-9-.webp",
+    "valor": 5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 30,
+    "nome": "Fanta Guaraná 600ml",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/refrigerante-fanta-guarana-600ml_112561.webp",
+    "valor": 6.5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 31,
+    "nome": "Fanta Laranja 600ml",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Fanta-Laranja-600Ml-Pet-110339_COCA_PAI.webp",
+    "valor": 6.5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 32,
+    "nome": "Esfirra de Carne",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/ESF_ABERTA_CARNE.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
+    "id": 33,
+    "nome": "Coca Cola 600ml ZERO",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Coca-Cola-600ml-sem-acucar.png",
+    "valor": 6.5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 34,
+    "nome": "Coca Cola 600ml",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/coca-cola-600ml-delivery-de-bebidas-em-cabo-frio.webp",
+    "valor": 6.5,
+    "ativo": true,
+    "categoria": "Bebidas"
+  },
+  {
+    "id": 35,
+    "nome": "Coca Cola 2L",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/Refrigerante-CocaCola-Pet-2L.png",
+    "valor": 12,
+    "ativo": true,
+    "categoria": "Bebidas"
+  }
+]
