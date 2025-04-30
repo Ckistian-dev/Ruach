@@ -40,6 +40,6 @@ def importar_produtos_do_json(nome_arquivo: str):
         db.close()
 
 
-from importar_produtos import importar_produtos_do_json
+if __name__ == "__main__":
+    importar_produtos_do_json("produtos.json")
 
-importar_produtos_do_json("produtos.json")
