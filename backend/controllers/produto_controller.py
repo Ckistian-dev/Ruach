@@ -38,3 +38,12 @@ def excluir_produto(db: Session, produto_id: int):
     db.commit()
     return produto
 
+def atualizar_ordem_produtos(db: Session, lista_ordem: list[dict]):
+    for item in lista_ordem:
+        produto = db.query(Produto).filter(Produto.id == item['id']).first()
+        if produto:
+            produto.ordem = item['ordem']
+    db.commit()
+    return {"detail": "Ordem dos produtos atualizada com sucesso"}
+
+
