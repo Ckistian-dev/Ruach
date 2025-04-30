@@ -27,6 +27,15 @@
     "categoria": "Salgados"
   },
   {
+    "id": 99,
+    "nome": "Esfirra de Carne",
+    "descricao": "",
+    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/ESF_ABERTA_CARNE.webp",
+    "valor": 10,
+    "ativo": true,
+    "categoria": "Salgados"
+  },
+  {
     "id": 4,
     "nome": "Bauru de calabresa cheddar 170gr",
     "descricao": "Bauru de calabresa cheddar 170gr",
@@ -277,15 +286,6 @@
     "valor": 6.5,
     "ativo": true,
     "categoria": "Bebidas"
-  },
-  {
-    "id": 32,
-    "nome": "Esfirra de Carne",
-    "descricao": "",
-    "imagem": "https://lds.visiontecnologia.com/wp-content/uploads/2025/03/ESF_ABERTA_CARNE.webp",
-    "valor": 10,
-    "ativo": true,
-    "categoria": "Salgados"
   },
   {
     "id": 33,
