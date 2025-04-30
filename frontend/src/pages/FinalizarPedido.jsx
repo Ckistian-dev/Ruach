@@ -202,7 +202,7 @@ export default function FinalizarPedido() {
         navigate("/pedido-confirmado");
 
         // Abrir WhatsApp
-        const telefoneLoja = "5545091010879";
+        const telefoneLoja = "5545991010879";
         const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
         window.open(url, "_blank");
     };
