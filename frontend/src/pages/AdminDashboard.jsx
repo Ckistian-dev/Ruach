@@ -22,12 +22,13 @@ export default function AdminDashboard() {
 
   const carregarProdutos = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/produtos`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/produtos/todos`);
       setProdutos(response.data);
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
     }
   };
+
 
   const handleLogout = () => {
     localStorage.removeItem("admin");

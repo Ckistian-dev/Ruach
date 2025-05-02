@@ -14,6 +14,10 @@ def criar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
 def listar_produtos_ativos(db: Session = Depends(get_db)):
     return produto_controller.listar_produtos_ativos(db)
 
+@router.get("/produtos/todos", response_model=list[ProdutoResponse])
+def listar_todos_produtos(db: Session = Depends(get_db)):
+    return produto_controller.listar_todos_produtos(db)
+
 @router.put("/produtos/{produto_id}", response_model=ProdutoResponse)
 def atualizar_produto(produto_id: int, produto_update: ProdutoUpdate, db: Session = Depends(get_db)):
     produto = produto_controller.atualizar_produto(db, produto_id, produto_update)

@@ -2,6 +2,9 @@ from sqlalchemy.orm import Session
 from models.produto import Produto
 from schemas.produto_schema import ProdutoCreate, ProdutoUpdate
 
+def listar_todos_produtos(db: Session) -> list[Produto]:
+    return db.query(Produto).order_by(Produto.ordem.asc()).all()
+
 def criar_produto(db: Session, produto: ProdutoCreate) -> Produto:
     db_produto = Produto(**produto.dict())
     db.add(db_produto)
