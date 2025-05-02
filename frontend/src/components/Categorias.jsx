@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const categorias = [
   {
@@ -26,6 +27,17 @@ const categorias = [
 
 export default function Categorias() {
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
   return (
     <section className="py-24 px-8 md:px-24 relative overflow-hidden">
       <motion.div
@@ -44,44 +56,71 @@ export default function Categorias() {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-        {categorias.map((categoria, index) => (
-          <motion.div
-            key={categoria.id}
-            className="relative rounded-3xl overflow-hidden shadow-2xl group transform transition-all duration-500 hover:scale-105"
-            initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            <img
-              src={categoria.imagem}
-              alt={categoria.nome}
-              className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-60 transition-all duration-500" />
-            <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6">
-              <motion.h3
-                className="text-3xl font-bold text-white mb-4"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.3 }}
-                viewport={{ once: true, amount: 0.3 }}
-              >
-                {categoria.nome}
-              </motion.h3>
-              <motion.button
-                onClick={() => {
-                  navigate(`/produtos?categoria=${encodeURIComponent(categoria.nome)}`);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="mt-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-md transition-all duration-300 shadow-md"
-                whileHover={{ scale: 1.05 }}
-              >
-                Explorar
-              </motion.button>
-            </div>
-          </motion.div>
-        ))}
+        {categorias.map((categoria, index) => {
+          const animationProps = isMobile
+            ? {
+                initial: {
+                  opacity: 0,
+                  x: index % 2 === 0 ? -60 : 60,
+                  scale: 0.9,
+                },
+                whileInView: {
+                  opacity: 1,
+                  x: 0,
+                  scale: 1,
+                },
+              }
+            : {
+                initial: {
+                  opacity: 0,
+                  y: 40,
+                  scale: 0.95,
+                },
+                whileInView: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                },
+              };
+
+          return (
+            <motion.div
+              key={categoria.id}
+              className="relative rounded-3xl overflow-hidden shadow-2xl group transform transition-all duration-500 hover:scale-105"
+              {...animationProps}
+              transition={{ duration: 0.7, delay: index * 0.2, ease: "easeOut" }}
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              <img
+                src={categoria.imagem}
+                alt={categoria.nome}
+                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-60 transition-all duration-500" />
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6">
+                <motion.h3
+                  className="text-3xl font-bold text-white mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.3 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                >
+                  {categoria.nome}
+                </motion.h3>
+                <motion.button
+                  onClick={() => {
+                    navigate(`/produtos?categoria=${encodeURIComponent(categoria.nome)}`);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="mt-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-md transition-all duration-300 shadow-md"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  Explorar
+                </motion.button>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );

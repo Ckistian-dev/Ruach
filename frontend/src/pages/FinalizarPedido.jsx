@@ -294,7 +294,9 @@ export default function FinalizarPedido() {
                         {[
                             { id: "pix", titulo: "Pix" },
                             { id: "dinheiro", titulo: "Dinheiro" },
-                            { id: "cartao", titulo: "Cartão" },
+                            { id: "cartao_credito", titulo: "Cartão Crédito" },
+                            { id: "cartao_debito", titulo: "Cartão Débito" },
+                            { id: "alimentacao", titulo: "Alimentação (Alelo, VR)" },
                         ].map((opcao) => (
                             <div
                                 key={opcao.id}
