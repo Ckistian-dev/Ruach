@@ -25,8 +25,9 @@ def importar_produtos_do_json(nome_arquivo: str):
 
         produtos_inseridos = []
 
-        for produto_data in produtos_json:
+        for index, produto_data in enumerate(produtos_json):
             try:
+                produto_data["ordem"] = index + 1  # 👈 define ordem crescente
                 produto_create = ProdutoCreate(**produto_data)
                 novo_produto = produto_controller.criar_produto(db, produto_create)
                 produtos_inseridos.append(novo_produto)

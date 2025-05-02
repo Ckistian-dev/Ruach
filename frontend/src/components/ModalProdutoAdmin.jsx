@@ -8,6 +8,7 @@ export default function ModalProdutoAdmin({ produto, onClose }) {
     valor: produto?.valor || "",
     imagem: produto?.imagem || "",
     categoria: produto?.categoria || "",
+    ativo: produto?.ativo ?? true, // necessário para o backend
   });
 
   const isEditando = Boolean(produto?.id);
@@ -21,14 +22,21 @@ export default function ModalProdutoAdmin({ produto, onClose }) {
     e.preventDefault();
 
     try {
+      const dados = {
+        ...form,
+        valor: parseFloat(form.valor),
+      };
+
       if (isEditando) {
-        await axios.put(`${import.meta.env.VITE_API_URL}/produtos/${produto.id}`, form);
+        await axios.put(`${import.meta.env.VITE_API_URL}/produtos/${produto.id}`, dados);
       } else {
-        await axios.post(`${import.meta.env.VITE_API_URL}/produtos`, form);
+        await axios.post(`${import.meta.env.VITE_API_URL}/produtos`, dados);
       }
-      onClose();
+
+      onClose(); // Fecha e recarrega
     } catch (error) {
       console.error("Erro ao salvar produto:", error);
+      alert("Erro ao salvar produto");
     }
   };
 
