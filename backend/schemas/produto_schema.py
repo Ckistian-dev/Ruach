@@ -24,9 +24,9 @@ class ProdutoResponse(BaseModel):
     ativo: bool
     categoria: Optional[str] = None
 
-    class Config:
-        orm_mode = True  # Compatibilidade com SQLAlchemy
-
+    model_config = {
+        "from_attributes": True  # Compatível com Pydantic v2
+    }
 
 class ProdutoOrdemUpdate(BaseModel):
     id: int
