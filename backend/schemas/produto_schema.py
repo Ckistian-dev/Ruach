@@ -1,19 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 class ProdutoCreate(BaseModel):
     nome: str
     descricao: Optional[str] = None
     imagem: Optional[str] = None
-    valor: float
-    categoria: Optional[str] = None   # 🆕 Adicionado!
+    valor: float = Field(..., gt=0)  # valor > 0
+    categoria: Optional[str] = None
 
 class ProdutoUpdate(BaseModel):
     nome: Optional[str] = None
     descricao: Optional[str] = None
     imagem: Optional[str] = None
-    valor: Optional[float] = None
-    categoria: Optional[str] = None    # 🆕 Adicionado também!
+    valor: Optional[float] = Field(None, gt=0)
+    categoria: Optional[str] = None
 
 class ProdutoResponse(BaseModel):
     id: int
@@ -22,12 +22,12 @@ class ProdutoResponse(BaseModel):
     imagem: Optional[str]
     valor: float
     ativo: bool
-    categoria: Optional[str] = None    # 🆕 Adicionado também!
+    categoria: Optional[str] = None
 
     class Config:
-        from_attributes = True
-        
+        orm_mode = True  # Compatibilidade com SQLAlchemy
+
+
 class ProdutoOrdemUpdate(BaseModel):
     id: int
     ordem: int
-

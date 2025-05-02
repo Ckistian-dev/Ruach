@@ -1,15 +1,9 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import sessionmaker
 from models.produto import Produto
+from database import Base, engine
 
-DATABASE_URL = "sqlite:///./produtos.db"
+# Cria todas as tabelas que ainda não existem
+Base.metadata.create_all(bind=engine)
 
-engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
-)
-Base = declarative_base()
-
-# 🔥 Aqui, vinculamos o modelo à Base
-Produto.__table__.create(bind=engine)
-
-print("✅ Banco de dados e tabela 'produtos' criada com sucesso!")
+print("✅ Tabelas criadas com sucesso!")
