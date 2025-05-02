@@ -5,8 +5,10 @@ class ProdutoCreate(BaseModel):
     nome: str
     descricao: Optional[str] = None
     imagem: Optional[str] = None
-    valor: float = Field(..., gt=0)  # valor > 0
+    valor: float = Field(..., gt=0)
     categoria: Optional[str] = None
+    ativo: Optional[bool] = True  # ✅ agora aceita campo 'ativo'
+    ordem: Optional[int] = 0      # ✅ agora aceita campo 'ordem'
 
 class ProdutoUpdate(BaseModel):
     nome: Optional[str] = None
