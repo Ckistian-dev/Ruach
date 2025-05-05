@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { toast } from 'react-toastify';
 
 const ORS_API_KEY = import.meta.env.VITE_ORS_API_KEY;
-const PIX_CODIGO = "52764726000102";
+const PIX_CODIGO = "50397719000186";
 
 export default function FinalizarPedido() {
     const { carrinho, esvaziarCarrinho } = useCarrinho();
