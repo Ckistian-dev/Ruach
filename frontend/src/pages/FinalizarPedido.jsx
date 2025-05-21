@@ -25,6 +25,7 @@ export default function FinalizarPedido() {
     });
     const [calculandoFrete, setCalculandoFrete] = useState(false);
     const [trocoPara, setTrocoPara] = useState("");
+    const API_URL = import.meta.env.VITE_API_URL;
 
 
     const enderecoLoja = [-53.776, -24.701];
@@ -195,16 +196,49 @@ export default function FinalizarPedido() {
 
         mensagem += `\n🎉 *Agradecemos a preferência!*\n✨ *Seu pedido está sendo preparado com muito carinho!* ✨`;
 
-        // Limpar o carrinho
-        esvaziarCarrinho();
 
-        // Redirecionar
-        navigate("/pedido-confirmado");
+        try {
+            const res = await fetch(`${API_URL}/enviar-pedido`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    form,
+                    carrinho,
+                    tipo_entrega: tipoEntrega,
+                    pagamento: pagamentoSelecionado,
+                    frete: tipoEntrega === "entrega" ? form.frete : 0.0,
+                }),
+            });
 
-        // Abrir WhatsApp
-        const telefoneLoja = "5545991010879";
-        const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
-        window.open(url, "_blank");
+            if (!res.ok) {
+                const error = await res.json();
+                toast.error(`Erro ao enviar pedido: ${error.detail || "Erro desconhecido"}`);
+                return;
+            }
+
+            const data = await res.json();
+            console.log("Pedido registrado na API:", data);
+
+            toast.success("Pedido registrado com sucesso!");
+
+            
+            // Limpar o carrinho
+            esvaziarCarrinho();
+
+            // Redirecionar
+            navigate("/pedido-confirmado");
+
+            // Abrir WhatsApp
+            const telefoneLoja = "5545991010879";
+            const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
+            window.open(url, "_blank");
+
+        } catch (err) {
+            console.error("Erro ao enviar para backend:", err);
+            toast.error("Falha ao registrar pedido. Tente novamente.");
+        }
     };
 
     return (

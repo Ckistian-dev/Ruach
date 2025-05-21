@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import produto_routes, admin_auth_routes
+from routes import produto_routes, admin_auth_routes, janus_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -15,3 +15,4 @@ app.add_middleware(
 
 app.include_router(produto_routes.router)
 app.include_router(admin_auth_routes.router)
+app.include_router(janus_router.router)
