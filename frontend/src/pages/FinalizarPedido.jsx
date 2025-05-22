@@ -206,7 +206,7 @@ export default function FinalizarPedido() {
                 frete: tipoEntrega === "entrega" ? form.frete : 0.0,
             };
 
-            console.log("📦 Enviando payload para backend:", payload); // <-- AQUI O LOG
+            console.log("📦 Enviando payload para backend:", payload);
 
             const res = await fetch(`${API_URL}/enviar-pedido`, {
                 method: "POST",
@@ -219,17 +219,19 @@ export default function FinalizarPedido() {
             if (!res.ok) {
                 const error = await res.json();
                 toast.error(`Erro ao enviar pedido: ${error.detail || "Erro desconhecido"}`);
-                return;
+                // ⚠️ Removido o return aqui
+            } else {
+                const data = await res.json();
+                console.log("✅ Pedido registrado na API:", data);
+                toast.success("Pedido registrado com sucesso!");
             }
-
-            const data = await res.json();
-            console.log("✅ Pedido registrado na API:", data);
-            toast.success("Pedido registrado com sucesso!");
 
         } catch (err) {
             console.error("Erro ao enviar para backend:", err);
             toast.error("Falha ao registrar pedido. Tente novamente.");
         }
+
+        // Continuará mesmo após erro na API ✅
 
         // Limpar o carrinho
         esvaziarCarrinho();
@@ -241,6 +243,7 @@ export default function FinalizarPedido() {
         const telefoneLoja = "5545991010879";
         const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
         window.open(url, "_blank");
+
     };
 
     return (
