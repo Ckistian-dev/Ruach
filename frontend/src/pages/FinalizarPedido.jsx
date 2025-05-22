@@ -198,18 +198,22 @@ export default function FinalizarPedido() {
 
 
         try {
+            const payload = {
+                form,
+                carrinho,
+                tipo_entrega: tipoEntrega,
+                pagamento: pagamentoSelecionado,
+                frete: tipoEntrega === "entrega" ? form.frete : 0.0,
+            };
+
+            console.log("📦 Enviando payload para backend:", payload); // <-- AQUI O LOG
+
             const res = await fetch(`${API_URL}/enviar-pedido`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    form,
-                    carrinho,
-                    tipo_entrega: tipoEntrega,
-                    pagamento: pagamentoSelecionado,
-                    frete: tipoEntrega === "entrega" ? form.frete : 0.0,
-                }),
+                body: JSON.stringify(payload),
             });
 
             if (!res.ok) {
@@ -219,26 +223,24 @@ export default function FinalizarPedido() {
             }
 
             const data = await res.json();
-            console.log("Pedido registrado na API:", data);
-
+            console.log("✅ Pedido registrado na API:", data);
             toast.success("Pedido registrado com sucesso!");
-
-            
-            // Limpar o carrinho
-            esvaziarCarrinho();
-
-            // Redirecionar
-            navigate("/pedido-confirmado");
-
-            // Abrir WhatsApp
-            const telefoneLoja = "5545991010879";
-            const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
-            window.open(url, "_blank");
 
         } catch (err) {
             console.error("Erro ao enviar para backend:", err);
             toast.error("Falha ao registrar pedido. Tente novamente.");
         }
+
+        // Limpar o carrinho
+        esvaziarCarrinho();
+
+        // Redirecionar
+        navigate("/pedido-confirmado");
+
+        // Abrir WhatsApp
+        const telefoneLoja = "5545991010879";
+        const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
+        window.open(url, "_blank");
     };
 
     return (
