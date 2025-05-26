@@ -11,6 +11,8 @@ export default function Catalogo() {
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState(["Todos"]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todos");
+  const [loading, setLoading] = useState(true);
+
 
 
   const location = useLocation();
@@ -25,6 +27,7 @@ export default function Catalogo() {
     }
   }, [location.search]);
 
+  // Atualize o useEffect de carregamento
   useEffect(() => {
     async function carregarProdutos() {
       try {
@@ -37,15 +40,17 @@ export default function Catalogo() {
           .filter(categoria => categoria && categoria !== "");
 
         const categoriasUnicas = Array.from(new Set(categoriasValidas));
-
         setCategorias(["Todos", ...categoriasUnicas]);
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
+      } finally {
+        setLoading(false); // Finaliza carregamento
       }
     }
 
     carregarProdutos();
   }, []);
+
 
 
   const produtosFiltrados = categoriaSelecionada === "Todos"
@@ -110,54 +115,81 @@ export default function Catalogo() {
           </AnimatePresence>
         </aside>
 
-        {/* Grid de Produtos */}
-        <main className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {produtosFiltrados.map((produto, index) => (
-            <motion.div
-              key={produto.id}
-              className="relative rounded-3xl overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center text-center group cursor-pointer"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              onClick={() => {
-                setProdutoSelecionado(produto);
-                setMostrarModal(true);
-              }}
-            >
-
-              {/* Botão adicionar */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setProdutoSelecionado(produto);
-                  setMostrarModal(true);
-                }}
-                className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 p-2 rounded-full transition-all duration-300 shadow-md"
+        {/* Grid de Produtos ou Loading */}
+        <main className="flex-1">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-full text-gray-600 animate-fade-in py-20">
+              <svg
+                className="animate-spin h-8 w-8 text-red-600 mb-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
               >
-                <Plus className="text-white w-5 h-5" />
-              </button>
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              <p className="text-lg font-medium">Carregando cardápio...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {produtosFiltrados.map((produto, index) => (
+                <motion.div
+                  key={produto.id}
+                  className="relative rounded-3xl overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center text-center group cursor-pointer"
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  onClick={() => {
+                    setProdutoSelecionado(produto);
+                    setMostrarModal(true);
+                  }}
+                >
+                  {/* Botão adicionar */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setProdutoSelecionado(produto);
+                      setMostrarModal(true);
+                    }}
+                    className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 p-2 rounded-full transition-all duration-300 shadow-md"
+                  >
+                    <Plus className="text-white w-5 h-5" />
+                  </button>
 
-              {/* Imagem do Produto */}
-              <div className="w-32 h-32 md:w-40 md:h-40">
-                <img
-                  src={produto.imagem}
-                  alt={produto.nome}
-                  className="w-full h-full object-contain rounded-xl"
-                />
-              </div>
+                  {/* Imagem do Produto */}
+                  <div className="w-32 h-32 md:w-40 md:h-40">
+                    <img
+                      src={produto.imagem}
+                      alt={produto.nome}
+                      className="w-full h-full object-contain rounded-xl"
+                    />
+                  </div>
 
-              {/* Informações */}
-              <div className="flex flex-col mb-2">
-                <span className="text-xl font-bold text-[#561c1c]">
-                  R$ {produto.valor?.toFixed(2).replace('.', ',')}
-                </span>
-                <h4 className="text-gray-700 text-base font-semibold">{produto.nome}</h4>
-              </div>
-
-            </motion.div>
-          ))}
+                  {/* Informações */}
+                  <div className="flex flex-col mb-2">
+                    <span className="text-xl font-bold text-[#561c1c]">
+                      R$ {produto.valor?.toFixed(2).replace('.', ',')}
+                    </span>
+                    <h4 className="text-gray-700 text-base font-semibold">{produto.nome}</h4>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </main>
+
 
       </div>
 

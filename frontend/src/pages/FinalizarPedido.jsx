@@ -26,7 +26,7 @@ export default function FinalizarPedido() {
     const [calculandoFrete, setCalculandoFrete] = useState(false);
     const [trocoPara, setTrocoPara] = useState("");
     const API_URL = import.meta.env.VITE_API_URL;
-
+    const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
     const enderecoLoja = [-53.776, -24.701];
     const camposObrigatoriosPreenchidos = form.nome && form.cep.length === 9 && form.rua && form.bairro && form.cidade && form.estado && form.numero;
@@ -199,12 +199,55 @@ export default function FinalizarPedido() {
 
         try {
             const payload = {
-                form,
-                carrinho,
-                tipo_entrega: tipoEntrega,
-                pagamento: pagamentoSelecionado,
-                frete: tipoEntrega === "entrega" ? form.frete : 0.0,
+                token: API_TOKEN,
+                atendimentos: [
+                    {
+                        uid: crypto.randomUUID(),
+                        datahora: new Date().toISOString().slice(0, 19).replace("T", " "),
+                        status: "aberto",
+                        empresa: {
+                            id: "52.764.726/0001-02",
+                            razaosocial: "SUMMER ICE SORVETES LTDA"
+                        },
+                        cliente: {
+                            doc: "",
+                            nome: form.nome,
+                            email: "",
+                            telefone: "",
+                            endereco: {
+                                cep: form.cep.replace("-", ""),
+                                logradouro: form.rua,
+                                numero: form.numero,
+                                complemento: form.complemento,
+                                bairro: form.bairro,
+                                cidade: form.cidade,
+                                estado: form.estado
+                            }
+                        },
+                        produtos: carrinho.map((item) => ({
+                            id: item.id.toString(),
+                            descricao: item.nome,
+                            qtde: 1,
+                            unitario: item.valor,
+                            total: item.valor,
+                            opcionais: []
+                        })),
+                        pagamentos: [
+                            {
+                                id: "00000000",
+                                descricao: pagamentoSelecionado,
+                                valor: total,
+                                status: "pago",
+                                carteira: pagamentoSelecionado
+                            }
+                        ],
+                        entregar: tipoEntrega === "entrega" ? "true" : "false",
+                        retirar: tipoEntrega === "retirada" ? "true" : "false",
+                        observacoes: ["Pedido via sistema"]
+                    }
+                ]
             };
+
 
             console.log("📦 Enviando payload para backend:", payload);
 
@@ -219,30 +262,30 @@ export default function FinalizarPedido() {
             if (!res.ok) {
                 const error = await res.json();
                 toast.error(`Erro ao enviar pedido: ${error.detail || "Erro desconhecido"}`);
-                // ⚠️ Removido o return aqui
+                // return
             } else {
                 const data = await res.json();
                 console.log("✅ Pedido registrado na API:", data);
                 toast.success("Pedido registrado com sucesso!");
             }
 
+            // Limpar o carrinho
+            esvaziarCarrinho();
+
+            // Redirecionar
+            navigate("/pedido-confirmado");
+
+            // Abrir WhatsApp
+            const telefoneLoja = "5545991010879";
+            const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
+            window.open(url, "_blank");
+
         } catch (err) {
             console.error("Erro ao enviar para backend:", err);
             toast.error("Falha ao registrar pedido. Tente novamente.");
         }
 
-        // Continuará mesmo após erro na API ✅
 
-        // Limpar o carrinho
-        esvaziarCarrinho();
-
-        // Redirecionar
-        navigate("/pedido-confirmado");
-
-        // Abrir WhatsApp
-        const telefoneLoja = "5545991010879";
-        const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
-        window.open(url, "_blank");
 
     };
 
