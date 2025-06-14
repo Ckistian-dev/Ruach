@@ -50,7 +50,7 @@ export default function FinalizarPedido() {
 
     const buscarEndereco = async () => {
         const cepNumeros = form.cep.replace(/\D/g, "");
-        if (cepNumeros.length === 8) {
+        if (cepNumeros.length >= 8) {
             try {
                 const res = await fetch(`https://viacep.com.br/ws/${cepNumeros}/json/`);
                 const data = await res.json();
