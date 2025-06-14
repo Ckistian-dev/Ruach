@@ -82,7 +82,7 @@ export default function Carrinho() {
     const total = useMemo(() => {
         return produtos.reduce((sum, item) => sum + item.valor * item.quantidade, 0);
     }, [produtos]);
-    
+
     const handleAdicionar = useCallback((produto) => {
         adicionarAoCarrinho(produto);
     }, [adicionarAoCarrinho]);
@@ -154,7 +154,7 @@ export default function Carrinho() {
                                 ))}
                             </AnimatePresence>
                         </div>
-                        
+
                         {/* Resumo Total */}
                         <motion.div
                             className="bg-white p-6 rounded-3xl shadow-xl space-y-6 mt-10"
@@ -172,18 +172,20 @@ export default function Carrinho() {
 
                             {/* Botões de ação */}
                             <div className="flex flex-col md:flex-row justify-center gap-6 mt-6">
-                                <Link
-                                    to="/produtos"
-                                    className="px-8 py-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold rounded-full transition text-center shadow-md"
-                                >
-                                    Continuar Comprando
-                                </Link>
+
                                 <Link
                                     to="/finalizar-pedido"
                                     className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full transition text-center shadow-md"
                                 >
                                     Finalizar Pedido
                                 </Link>
+                                <Link
+                                    to="/produtos"
+                                    className="px-8 py-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold rounded-full transition text-center shadow-md"
+                                >
+                                    Continuar Comprando
+                                </Link>
+
                             </div>
                         </motion.div>
                     </motion.div>
