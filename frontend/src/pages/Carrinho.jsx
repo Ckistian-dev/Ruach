@@ -1,25 +1,98 @@
+// src/pages/Carrinho.jsx (ou onde quer que seu arquivo esteja)
+
+import { memo, useMemo, useCallback } from 'react';
 import { useCarrinho } from "../context/CarrinhoContext";
 import { Link } from "react-router-dom";
 import { Plus, Minus } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion"; // 👈 Importa AnimatePresence também
+import { motion, AnimatePresence } from "framer-motion";
+
+// ===================================================================
+// 1. COMPONENTE INTERNO PARA O ITEM DO CARRINHO
+//    (Não precisa ser exportado, pois só é usado aqui dentro)
+// ===================================================================
+
+const ItemCarrinho = memo(({ produto, onAdicionar, onRemover }) => {
+    return (
+        <motion.div
+            layout // Anima a mudança de posição na lista
+            key={produto.id}
+            className="flex flex-col sm:flex-row items-center justify-between bg-white rounded-3xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 gap-6 sm:gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+        >
+            {/* Imagem e detalhes */}
+            <div className="flex items-center gap-4 w-full">
+                <img
+                    src={produto.imagem}
+                    alt={produto.nome}
+                    className="w-24 h-24 object-scale-down rounded-2xl flex-shrink-0"
+                />
+                <div className="flex-grow">
+                    <h2 className="text-lg font-bold text-[#561c1c]">{produto.nome}</h2>
+                    <p className="text-gray-500 mt-1">
+                        R$ {produto.valor?.toFixed(2).replace('.', ',')}
+                    </p>
+                </div>
+            </div>
+
+            {/* Controle de Quantidade */}
+            <div className="flex items-center gap-4">
+                <button
+                    onClick={() => onRemover(produto)}
+                    className="bg-gray-200 hover:bg-gray-300 p-2 rounded-full transition"
+                    aria-label="Remover um item"
+                >
+                    <Minus size={18} className="text-[#561c1c]" />
+                </button>
+                <span className="text-lg font-bold w-8 text-center">{produto.quantidade}</span>
+                <button
+                    onClick={() => onAdicionar(produto)}
+                    className="bg-gray-200 hover:bg-gray-300 p-2 rounded-full transition"
+                    aria-label="Adicionar um item"
+                >
+                    <Plus size={18} className="text-[#561c1c]" />
+                </button>
+            </div>
+        </motion.div>
+    );
+});
+
+
+// ===================================================================
+// 2. COMPONENTE PRINCIPAL DA PÁGINA DO CARRINHO (Exportação Padrão)
+// ===================================================================
 
 export default function Carrinho() {
     const { carrinho, adicionarAoCarrinho, removerDoCarrinho } = useCarrinho();
 
-    const produtosAgrupados = carrinho.reduce((acc, item) => {
-        const key = item.id;
-        if (!acc[key]) {
-            acc[key] = { ...item, quantidade: 0 };
-        }
-        acc[key].quantidade += 1;
-        return acc;
-    }, {});
+    const produtos = useMemo(() => {
+        const produtosAgrupados = carrinho.reduce((acc, item) => {
+            const key = item.id;
+            if (!acc[key]) {
+                acc[key] = { ...item, quantidade: 0 };
+            }
+            acc[key].quantidade += 1;
+            return acc;
+        }, {});
+        return Object.values(produtosAgrupados);
+    }, [carrinho]);
 
-    const produtos = Object.values(produtosAgrupados);
-    const total = produtos.reduce((sum, item) => sum + item.valor * item.quantidade, 0);
+    const total = useMemo(() => {
+        return produtos.reduce((sum, item) => sum + item.valor * item.quantidade, 0);
+    }, [produtos]);
+    
+    const handleAdicionar = useCallback((produto) => {
+        adicionarAoCarrinho(produto);
+    }, [adicionarAoCarrinho]);
+
+    const handleRemover = useCallback((produto) => {
+        removerDoCarrinho(produto);
+    }, [removerDoCarrinho]);
 
     return (
-        <section className="min-h-screen pt-32 px-6 md:px-24 pb-16">
+        <section className="min-h-screen pt-16 px-6 md:px-24 pb-16">
 
             {/* Título */}
             <motion.div
@@ -69,63 +142,29 @@ export default function Carrinho() {
                         transition={{ duration: 0.7 }}
                     >
                         {/* Lista de produtos */}
-                        <AnimatePresence mode="sync">
-                            {produtos.map((produto, index) => (
-                                <motion.div
-                                    key={produto.id}
-                                    className="flex items-center justify-between bg-white rounded-3xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300"
-                                    initial={{ scale: 0.9 }}
-                                    animate={{ scale: 1 }}
-                                    exit={{ scale: 0.9 }}
-                                    transition={{ duration: 0.6 }}
-                                >
-                                    {/* Imagem e detalhes */}
-                                    <div className="flex items-center gap-4">
-                                        <img
-                                            src={produto.imagem}
-                                            alt={produto.nome}
-                                            className="w-24 h-24 object-cover rounded-2xl"
-                                        />
-                                        <div>
-                                            <h2 className="text-xl font-bold text-[#561c1c]">{produto.nome}</h2>
-                                            <p className="text-gray-500 mt-1">
-                                                R$ {produto.valor?.toFixed(2).replace(".", ",")}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Controle de Quantidade */}
-                                    <div className="flex items-center gap-4">
-                                        <button
-                                            onClick={() => removerDoCarrinho(produto)}
-                                            className="bg-gray-200 hover:bg-gray-300 p-2 rounded-full transition"
-                                        >
-                                            <Minus size={18} className="text-[#561c1c]" />
-                                        </button>
-                                        <span className="text-lg font-bold">{produto.quantidade}</span>
-                                        <button
-                                            onClick={() => adicionarAoCarrinho(produto)}
-                                            className="bg-gray-200 hover:bg-gray-300 p-2 rounded-full transition"
-                                        >
-                                            <Plus size={18} className="text-[#561c1c]" />
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-
+                        <div className="space-y-6">
+                            <AnimatePresence>
+                                {produtos.map((produto) => (
+                                    <ItemCarrinho
+                                        key={produto.id}
+                                        produto={produto}
+                                        onAdicionar={handleAdicionar}
+                                        onRemover={handleRemover}
+                                    />
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                        
                         {/* Resumo Total */}
                         <motion.div
                             className="bg-white p-6 rounded-3xl shadow-xl space-y-6 mt-10"
-                            initial={{ scale: 0.9 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.9 }}
-                            transition={{ duration: 0.6 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
                         >
                             <h3 className="text-2xl font-bold text-[#561c1c] text-center mb-4">
                                 Resumo do Pedido
                             </h3>
-
                             <div className="flex justify-between items-center text-lg font-semibold text-gray-700">
                                 <span>Total</span>
                                 <span>R$ {total.toFixed(2).replace(".", ",")}</span>

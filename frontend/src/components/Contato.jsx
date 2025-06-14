@@ -76,12 +76,12 @@ export default function Contato() {
               <h4 className="text-red-600 font-bold text-sm">ATENDIMENTO</h4>
               <p className="text-lg font-bold leading-6">
                 Dom: 14:00 – 22:00<br />
-                Seg: 17:00 – 22:00<br />
+                Seg: 14:00 – 22:00<br />
                 Ter: FECHADO<br />
-                Qua: 17:00 – 22:00<br />
-                Qui: 17:00 – 22:00<br />
-                Sex: 17:00 – 22:00<br />
-                Sáb: 17:00 – 22:00
+                Qua: 14:00 – 22:00<br />
+                Qui: 14:00 – 22:00<br />
+                Sex: 14:00 – 22:00<br />
+                Sáb: 14:00 – 22:00
               </p>
             </div>
           </div>

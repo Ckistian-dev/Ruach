@@ -103,10 +103,10 @@ export default function FinalizarPedido() {
             if (matrixData.distances && Array.isArray(matrixData.distances)) {
                 const distanciaKm = matrixData.distances[0][1];
 
-                let valor = 5;
+                let valor = 10;
                 for (let i = 1; i <= 10; i++) {
                     if (distanciaKm <= i) {
-                        valor = 5 + (i - 1) * 2;
+                        valor = 10 + (i - 1) * 2;
                         break;
                     }
                 }

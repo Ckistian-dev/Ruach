@@ -59,7 +59,7 @@ export default function Catalogo() {
 
 
   return (
-    <section className="min-h-screen px-6 md:px-24 py-16">
+    <section className="min-h-screen px-4 md:px-24 py-16">
       <motion.div
         className="text-center mb-16"
         initial={{ opacity: 0, y: -30 }}
@@ -142,7 +142,7 @@ export default function Catalogo() {
               <p className="text-lg font-medium">Carregando cardápio...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {produtosFiltrados.map((produto, index) => (
                 <motion.div
                   key={produto.id}
@@ -179,10 +179,12 @@ export default function Catalogo() {
 
                   {/* Informações */}
                   <div className="flex flex-col mb-2">
-                    <span className="text-xl font-bold text-[#561c1c]">
-                      R$ {produto.valor?.toFixed(2).replace('.', ',')}
+                    <span className="text-lg font-bold text-[#561c1c]">
+                      {produto.nome}
                     </span>
-                    <h4 className="text-gray-700 text-base font-semibold">{produto.nome}</h4>
+                    <h4 className="text-gray-700 text-base font-semibold">
+                      R$ {produto.valor?.toFixed(2).replace('.', ',')}
+                    </h4>
                   </div>
                 </motion.div>
               ))}

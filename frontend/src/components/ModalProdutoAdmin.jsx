@@ -5,6 +5,7 @@ import axios from "axios";
 export default function ModalProdutoAdmin({ produto, onClose }) {
   const [form, setForm] = useState({
     nome: produto?.nome || "",
+    descricao: produto?.descricao || "",
     valor: produto?.valor || "",
     imagem: produto?.imagem || "",
     categoria: produto?.categoria || "",
@@ -62,6 +63,15 @@ export default function ModalProdutoAdmin({ produto, onClose }) {
             required
           />
           <input
+            type="text"
+            name="descricao"
+            placeholder="Descrição"
+            value={form.descricao}
+            onChange={handleChange}
+            className="border p-2 rounded"
+            required
+          />
+          <input
             type="number"
             name="valor"
             placeholder="Valor"
@@ -98,9 +108,9 @@ export default function ModalProdutoAdmin({ produto, onClose }) {
 
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition"
+          className="absolute top-5 right-5 text-gray-500 hover:text-red-500 transition"
         >
-          ✖
+          X
         </button>
       </motion.div>
     </div>
