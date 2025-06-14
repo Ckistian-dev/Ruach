@@ -132,6 +132,7 @@ export default function FinalizarPedido() {
 
     useEffect(() => {
         if (tipoEntrega === "entrega" && form.cep.length === 9 && form.rua && form.numero && form.bairro && form.cidade && form.estado) {
+            buscarEndereco();
             calcularFrete();
         }
     }, [form.cep, form.rua, form.numero, form.bairro, form.cidade, form.estado, tipoEntrega]);
