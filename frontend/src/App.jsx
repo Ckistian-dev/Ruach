@@ -8,8 +8,6 @@ import Footer from './components/Footer';
 import Carrinho from "./pages/Carrinho";
 import FinalizarPedido from "./pages/FinalizarPedido";
 import PedidoConfirmado from "./pages/PedidoConfirmado";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
 import ScrollToTop from "./components/ScrollToTop";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -26,6 +24,7 @@ function App() {
           style={{
             width: "auto",
             minWidth: "unset",
+            color: "green"
           }}
         />
         {/* Fundo decorativo preenchendo tudo */}
@@ -49,8 +48,6 @@ function App() {
                   <Route path="/carrinho" element={<Carrinho />} />
                   <Route path="/finalizar-pedido" element={<FinalizarPedido />} />
                   <Route path="/pedido-confirmado" element={<PedidoConfirmado />} />
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin/produtos" element={<AdminDashboard />} />
                 </Routes>
               </main>
 

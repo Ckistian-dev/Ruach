@@ -1,29 +1,32 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useCallback } from "react";
 
 const CarrinhoContext = createContext();
 
 export function CarrinhoProvider({ children }) {
   const [carrinho, setCarrinho] = useState([]);
 
-  const adicionarAoCarrinho = (produto) => {
+  const adicionarAoCarrinho = useCallback((produto) => {
     setCarrinho((prev) => [...prev, produto]);
-  };
+  }, []);
 
-  const removerDoCarrinho = (produto) => {
+  const removerDoCarrinho = useCallback((produto) => {
     setCarrinho((prev) => {
-      const index = prev.findIndex(p => p.id === produto.id);
+      // Encontra o ÍNDICE do ÚLTIMO item com o mesmo ID no carrinho
+      const index = prev.map(p => p.ID).lastIndexOf(produto.ID);
+      
       if (index !== -1) {
-        const updated = [...prev];
-        updated.splice(index, 1);
-        return updated;
+        const novoCarrinho = [...prev];
+        novoCarrinho.splice(index, 1); // Remove apenas esse item
+        return novoCarrinho;
       }
-      return prev;
+      
+      return prev; // Se não encontrar, retorna o carrinho como estava
     });
-  };
+  }, []);
 
-  const esvaziarCarrinho = () => {
+  const esvaziarCarrinho = useCallback(() => {
     setCarrinho([]);
-  };
+  }, []);
 
   return (
     <CarrinhoContext.Provider value={{ carrinho, adicionarAoCarrinho, removerDoCarrinho, esvaziarCarrinho }}>

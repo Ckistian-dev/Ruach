@@ -1,38 +1,36 @@
-// src/pages/Carrinho.jsx (ou onde quer que seu arquivo esteja)
-
 import { memo, useMemo, useCallback } from 'react';
 import { useCarrinho } from "../context/CarrinhoContext";
 import { Link } from "react-router-dom";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Trash2 } from "lucide-react"; // Importando ícone de lixeira
 import { motion, AnimatePresence } from "framer-motion";
 
 // ===================================================================
-// 1. COMPONENTE INTERNO PARA O ITEM DO CARRINHO
-//    (Não precisa ser exportado, pois só é usado aqui dentro)
+// COMPONENTE OTIMIZADO PARA O ITEM DO CARRINHO
 // ===================================================================
-
 const ItemCarrinho = memo(({ produto, onAdicionar, onRemover }) => {
     return (
         <motion.div
-            layout // Anima a mudança de posição na lista
-            key={produto.id}
-            className="flex flex-col sm:flex-row items-center justify-between bg-white rounded-3xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 gap-6 sm:gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            // 👇 MUDANÇA: Removida a propriedade 'layout' que é pesada.
+            key={produto.ID}
+            className="flex flex-col sm:flex-row items-center justify-between bg-white rounded-3xl p-5 shadow-lg hover:shadow-xl transition-shadow duration-300 gap-6 sm:gap-4"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50, transition: { duration: 0.3 } }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
             {/* Imagem e detalhes */}
             <div className="flex items-center gap-4 w-full">
                 <img
-                    src={produto.imagem}
-                    alt={produto.nome}
-                    className="w-24 h-24 object-scale-down rounded-2xl flex-shrink-0"
+                    // 👇 MUDANÇAS: Usando 'Imagem' e 'Nome'
+                    src={produto.Imagem}
+                    alt={produto.Nome}
+                    className="w-24 h-24 object-contain rounded-2xl flex-shrink-0"
                 />
                 <div className="flex-grow">
-                    <h2 className="text-lg font-bold text-[#561c1c]">{produto.nome}</h2>
+                    <h2 className="text-lg font-bold text-[#561c1c]">{produto.Nome}</h2>
                     <p className="text-gray-500 mt-1">
-                        R$ {produto.valor?.toFixed(2).replace('.', ',')}
+                        {/* 👇 MUDANÇA: Usando 'Preço' */}
+                        R$ {produto.Preço?.toFixed(2).replace('.', ',')}
                     </p>
                 </div>
             </div>
@@ -61,15 +59,15 @@ const ItemCarrinho = memo(({ produto, onAdicionar, onRemover }) => {
 
 
 // ===================================================================
-// 2. COMPONENTE PRINCIPAL DA PÁGINA DO CARRINHO (Exportação Padrão)
+// COMPONENTE PRINCIPAL DA PÁGINA DO CARRINHO
 // ===================================================================
-
 export default function Carrinho() {
-    const { carrinho, adicionarAoCarrinho, removerDoCarrinho } = useCarrinho();
+    const { carrinho, adicionarAoCarrinho, removerDoCarrinho, esvaziarCarrinho } = useCarrinho();
 
     const produtos = useMemo(() => {
         const produtosAgrupados = carrinho.reduce((acc, item) => {
-            const key = item.id;
+            // 👇 MUDANÇA: Usando 'ID' como chave
+            const key = item.ID;
             if (!acc[key]) {
                 acc[key] = { ...item, quantidade: 0 };
             }
@@ -80,7 +78,8 @@ export default function Carrinho() {
     }, [carrinho]);
 
     const total = useMemo(() => {
-        return produtos.reduce((sum, item) => sum + item.valor * item.quantidade, 0);
+        // 👇 MUDANÇA: Usando 'Preço' para calcular o total
+        return produtos.reduce((sum, item) => sum + item.Preço * item.quantidade, 0);
     }, [produtos]);
 
     const handleAdicionar = useCallback((produto) => {
@@ -93,19 +92,18 @@ export default function Carrinho() {
 
     return (
         <section className="min-h-screen pt-16 px-6 md:px-24 pb-16">
-
             {/* Título */}
             <motion.div
                 className="text-center mb-16"
-                initial={{ opacity: 0, y: -30 }}
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
             >
                 <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-[#1a1a1a] mb-4">
                     Confira seu <span className="text-red-600">Carrinho</span> de Compras!
                 </h1>
                 <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">
-                    Revise seus produtos antes de finalizar seu pedido. Entrega rápida e qualidade garantida!
+                    Revise seus produtos antes de finalizar seu pedido.
                 </p>
             </motion.div>
 
@@ -115,19 +113,20 @@ export default function Carrinho() {
                     <motion.div
                         key="vazio"
                         className="text-center space-y-8"
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.6 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.4 }}
                     >
                         <img
                             src="https://lagreepe.com.br/Content/projeto/img/cesta-vazia.png"
                             alt="Carrinho Vazio"
-                            className="w-64 mx-auto opacity-80 mb-24"
+                            className="w-64 mx-auto opacity-80"
                         />
+                        <h2 className="text-2xl font-semibold text-gray-700">Seu carrinho está vazio</h2>
                         <Link
                             to="/produtos"
-                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition shadow-lg"
+                            className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition shadow-lg"
                         >
                             Ver Cardápio
                         </Link>
@@ -136,17 +135,16 @@ export default function Carrinho() {
                     <motion.div
                         key="carrinho"
                         className="space-y-8 max-w-5xl mx-auto"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.7 }}
+                        initial="initial"
+                        animate="animate"
+                        variants={{ animate: { transition: { staggerChildren: 0.1 } } }}
                     >
                         {/* Lista de produtos */}
                         <div className="space-y-6">
                             <AnimatePresence>
                                 {produtos.map((produto) => (
                                     <ItemCarrinho
-                                        key={produto.id}
+                                        key={produto.ID}
                                         produto={produto}
                                         onAdicionar={handleAdicionar}
                                         onRemover={handleRemover}
@@ -160,19 +158,23 @@ export default function Carrinho() {
                             className="bg-white p-6 rounded-3xl shadow-xl space-y-6 mt-10"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
                         >
-                            <h3 className="text-2xl font-bold text-[#561c1c] text-center mb-4">
-                                Resumo do Pedido
-                            </h3>
-                            <div className="flex justify-between items-center text-lg font-semibold text-gray-700">
+                            <div className="flex justify-between items-center">
+                               <h3 className="text-2xl font-bold text-[#561c1c]">
+                                   Resumo do Pedido
+                               </h3>
+                               <button onClick={esvaziarCarrinho} className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors">
+                                  <Trash2 size={16} />
+                               </button>
+                            </div>
+                            
+                            <div className="flex justify-between items-center text-xl font-semibold text-gray-700">
                                 <span>Total</span>
                                 <span>R$ {total.toFixed(2).replace(".", ",")}</span>
                             </div>
 
-                            {/* Botões de ação */}
                             <div className="flex flex-col md:flex-row justify-center gap-6 mt-6">
-
                                 <Link
                                     to="/finalizar-pedido"
                                     className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full transition text-center shadow-md"
@@ -185,7 +187,6 @@ export default function Carrinho() {
                                 >
                                     Continuar Comprando
                                 </Link>
-
                             </div>
                         </motion.div>
                     </motion.div>

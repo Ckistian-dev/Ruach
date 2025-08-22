@@ -1,48 +1,58 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useCarrinho } from "../context/CarrinhoContext";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from 'react-toastify';
 
+// Variáveis de Ambiente
 const ORS_API_KEY = import.meta.env.VITE_ORS_API_KEY;
-const PIX_CODIGO = "50397719000186";
+const PIX_CODIGO = "50397719000186"; // Sua chave PIX
+const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL; // URL do seu App Script
 
 export default function FinalizarPedido() {
     const { carrinho, esvaziarCarrinho } = useCarrinho();
     const navigate = useNavigate();
+
+    // Estados do formulário e da página
     const [pagamentoSelecionado, setPagamentoSelecionado] = useState("");
     const [tipoEntrega, setTipoEntrega] = useState("");
     const [form, setForm] = useState({
-        nome: "",
-        cep: "",
-        rua: "",
-        bairro: "",
-        cidade: "",
-        estado: "",
-        numero: "",
-        complemento: "",
-        frete: null,
+        nome: "", cep: "", rua: "", bairro: "", cidade: "", estado: "", numero: "", complemento: "", frete: null,
     });
-    const [calculandoFrete, setCalculandoFrete] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [trocoPara, setTrocoPara] = useState("");
-    const API_URL = import.meta.env.VITE_API_URL;
-    const API_TOKEN = import.meta.env.VITE_API_TOKEN;
+    
+    const enderecoLoja = [-53.776, -24.701]; // Coordenadas [longitude, latitude] da sua loja
 
-    const enderecoLoja = [-53.776, -24.701];
-    const camposObrigatoriosPreenchidos = form.nome && form.cep.length === 9 && form.rua && form.bairro && form.cidade && form.estado && form.numero;
-    const subtotal = carrinho.reduce((sum, item) => sum + item.valor, 0);
+    // Agrupamento de produtos e cálculo de totais
+    const { produtosAgrupados, subtotal } = useMemo(() => {
+        const agrupados = carrinho.reduce((acc, item) => {
+            const key = item.ID;
+            if (!acc[key]) {
+                acc[key] = { ...item, quantidade: 0 };
+            }
+            acc[key].quantidade += 1;
+            return acc;
+        }, {});
+        const sub = Object.values(agrupados).reduce((sum, item) => sum + item.Preço * item.quantidade, 0);
+        return { produtosAgrupados: Object.values(agrupados), subtotal: sub };
+    }, [carrinho]);
+
     const total = subtotal + (tipoEntrega === "entrega" ? (form.frete ?? 0) : 0);
+
+    // Validação do formulário para habilitar o botão de confirmar
+    const camposObrigatoriosPreenchidos = form.nome && form.cep.length >= 8 && form.rua && form.bairro && form.cidade && form.estado && form.numero;
+    const isFormValid = tipoEntrega && form.nome.trim() && pagamentoSelecionado && 
+                        (tipoEntrega === "retirada" || (camposObrigatoriosPreenchidos && form.frete !== null));
+
+    // --- FUNÇÕES AUXILIARES ---
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === "cep") {
             const numeros = value.replace(/\D/g, "").slice(0, 8);
-            if (numeros.length === 8) {
-                const cepFormatado = numeros.replace(/(\d{5})(\d{3})/, "$1-$2");
-                setForm((prev) => ({ ...prev, cep: cepFormatado }));
-            } else {
-                setForm((prev) => ({ ...prev, cep: numeros }));
-            }
+            const cepFormatado = numeros.replace(/(\d{5})(\d{3})/, "$1-$2");
+            setForm((prev) => ({ ...prev, cep: cepFormatado }));
         } else {
             setForm((prev) => ({ ...prev, [name]: value }));
         }
@@ -50,59 +60,38 @@ export default function FinalizarPedido() {
 
     const buscarEndereco = async () => {
         const cepNumeros = form.cep.replace(/\D/g, "");
-        if (cepNumeros.length >= 8) {
+        if (cepNumeros.length === 8) {
             try {
                 const res = await fetch(`https://viacep.com.br/ws/${cepNumeros}/json/`);
                 const data = await res.json();
                 if (!data.erro) {
                     setForm((prev) => ({
-                        ...prev,
-                        rua: data.logradouro,
-                        bairro: data.bairro,
-                        cidade: data.localidade,
-                        estado: data.uf,
+                        ...prev, rua: data.logradouro, bairro: data.bairro, cidade: data.localidade, estado: data.uf,
                     }));
                 }
-            } catch (error) {
-                console.error("Erro ao buscar endereço:", error);
-            }
+            } catch (error) { console.error("Erro ao buscar endereço:", error); }
         }
     };
 
     const calcularFrete = async () => {
-        setCalculandoFrete(true);
+        if (!form.rua || !form.numero || !form.cidade) return;
         try {
             const enderecoCompleto = `${form.rua}, ${form.numero}, ${form.bairro}, ${form.cidade}, ${form.estado}`;
-            const geoRes = await fetch(
-                `https://api.openrouteservice.org/geocode/search?api_key=${ORS_API_KEY}&text=${encodeURIComponent(enderecoCompleto)}`
-            );
+            const geoRes = await fetch(`https://api.openrouteservice.org/geocode/search?api_key=${ORS_API_KEY}&text=${encodeURIComponent(enderecoCompleto)}`);
             const geoData = await geoRes.json();
-
             if (!geoData.features || geoData.features.length === 0) {
-                alert("Endereço não encontrado.");
+                toast.error("Endereço não encontrado para cálculo do frete.");
                 return;
             }
-
             const [lng, lat] = geoData.features[0].geometry.coordinates;
-
             const matrixRes = await fetch("https://api.openrouteservice.org/v2/matrix/driving-car", {
                 method: "POST",
-                headers: {
-                    Authorization: ORS_API_KEY,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    locations: [enderecoLoja, [lng, lat]],
-                    metrics: ["distance"],
-                    units: "km",
-                }),
+                headers: { Authorization: ORS_API_KEY, "Content-Type": "application/json" },
+                body: JSON.stringify({ locations: [enderecoLoja, [lng, lat]], metrics: ["distance"], units: "km" }),
             });
-
             const matrixData = await matrixRes.json();
-
             if (matrixData.distances && Array.isArray(matrixData.distances)) {
                 const distanciaKm = matrixData.distances[0][1];
-
                 let valor = 10;
                 for (let i = 1; i <= 10; i++) {
                     if (distanciaKm <= i) {
@@ -110,184 +99,110 @@ export default function FinalizarPedido() {
                         break;
                     }
                 }
-
                 setForm((prev) => ({ ...prev, frete: valor }));
             }
         } catch (error) {
             console.error("Erro ao calcular frete:", error);
-            alert("Erro ao calcular frete. Verifique os dados.");
-        } finally {
-            setCalculandoFrete(false);
+            toast.error("Erro ao calcular frete. Verifique os dados.");
         }
     };
 
     function formatarMoeda(valor) {
-        valor = valor.replace(/\D/g, ""); // Remove tudo que não é número
-        valor = (Number(valor) / 100).toFixed(2) + ""; // Divide por 100 para ter 2 casas decimais
-        valor = valor.replace(".", ","); // Troca ponto por vírgula
-        valor = "R$ " + valor; // Adiciona o símbolo de real
-        return valor;
+        valor = valor.replace(/\D/g, "");
+        valor = (Number(valor) / 100).toFixed(2) + "";
+        valor = valor.replace(".", ",");
+        return "R$ " + valor;
     }
-
+    
+    useEffect(() => {
+        if (tipoEntrega === "entrega" && form.cep.length >= 8) {
+            buscarEndereco();
+        }
+    }, [form.cep, tipoEntrega]);
 
     useEffect(() => {
-        if (tipoEntrega === "entrega" && form.cep.length === 9 && form.rua && form.numero && form.bairro && form.cidade && form.estado) {
-            buscarEndereco();
+        if (tipoEntrega === "entrega" && camposObrigatoriosPreenchidos) {
             calcularFrete();
         }
-    }, [form.cep, form.rua, form.numero, form.bairro, form.cidade, form.estado, tipoEntrega]);
+    }, [form.rua, form.numero, form.bairro, form.cidade, form.estado]);
+
+    // --- FUNÇÃO PRINCIPAL DE ENVIO ---
 
     const handleConfirmarPedido = async () => {
-        if (!form.nome.trim()) {
-            alert("Preencha seu nome!");
+        if (!isFormValid) {
+            toast.warn("Por favor, preencha todos os campos obrigatórios.");
             return;
         }
-        if (tipoEntrega === "entrega" && (!camposObrigatoriosPreenchidos || form.frete === null)) {
-            alert("Preencha todos os dados de entrega!");
-            return;
-        }
-        if (!pagamentoSelecionado) {
-            alert("Selecione uma forma de pagamento!");
-            return;
-        }
+        setIsSubmitting(true);
 
-        let mensagem = `🍽️ *Novo Pedido Recebido!* 🍽️\n\n`;
-        mensagem += `👤 *Cliente:* ${form.nome}\n`;
-        mensagem += `🚚 *Entrega:* ${tipoEntrega === "entrega" ? "Entrega em domicílio 🏡" : "Retirada na loja 🏪"}\n\n`;
+        const itensPedido = produtosAgrupados.map(p => `${p.quantidade}x ${p.Nome}`).join('; ');
+        const enderecoCompleto = tipoEntrega === 'entrega' 
+            ? `${form.rua}, ${form.numero}, ${form.bairro} - ${form.cidade}/${form.estado}`
+            : 'Retirada na loja';
 
-        mensagem += `🛒 *Itens do Pedido:*\n`;
-        carrinho.forEach((item) => {
-            mensagem += `• ${item.nome} — *R$ ${item.valor.toFixed(2).replace(".", ",")}*\n`;
-        });
-
-        mensagem += `\n💰 *Subtotal:* R$ ${subtotal.toFixed(2).replace(".", ",")}\n`;
-
-        if (tipoEntrega === "entrega" && form.frete) {
-            mensagem += `🚛 *Frete:* R$ ${form.frete.toFixed(2).replace(".", ",")}\n`;
-        }
-
-        mensagem += `🧾 *Total:* *R$ ${total.toFixed(2).replace(".", ",")}*\n`;
-
-        if (pagamentoSelecionado === "dinheiro" && trocoPara) {
-            const valorNumerico = parseFloat(
-                trocoPara.replace("R$ ", "").replace(",", ".")
-            );
-            const trocoValor = valorNumerico - total;
-            if (trocoValor > 0) {
-                mensagem += `💵 *Troco para:* R$ ${valorNumerico.toFixed(2).replace(".", ",")} (Troco: R$ ${trocoValor.toFixed(2).replace(".", ",")})\n`;
-            } else {
-                mensagem += `💵 *Troco:* Sem necessidade de troco.\n`;
-            }
-        }
-
-        if (tipoEntrega === "entrega") {
-            mensagem += `\n📍 *Endereço de Entrega:*\n${form.rua}, ${form.numero}\n${form.bairro} - ${form.cidade}/${form.estado}\n`;
-            if (form.complemento) {
-                mensagem += `🏢 *Complemento:* ${form.complemento}\n`;
-            }
-        }
-
-        mensagem += `💳 *Forma de Pagamento:* ${pagamentoSelecionado.toUpperCase()}\n`;
-
-        // Se for pagamento por PIX, adicionar informações adicionais
-        if (pagamentoSelecionado === "pix") {
-            mensagem += `\n🏦 *Chave PIX:* ${PIX_CODIGO}\n`;
-            mensagem += `📩 *Realize o pagamento e envie o comprovante por WhatsApp!*\n`;
-        }
-
-        mensagem += `\n🎉 *Agradecemos a preferência!*\n✨ *Seu pedido está sendo preparado com muito carinho!* ✨`;
-
+        const pedidoParaPlanilha = {
+            id: `PEDIDO-${Date.now()}`,
+            dataHora: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+            cliente: form.nome,
+            tipoEntrega: tipoEntrega.charAt(0).toUpperCase() + tipoEntrega.slice(1),
+            endereco: enderecoCompleto,
+            itens: itensPedido,
+            subtotal: subtotal.toFixed(2).replace('.',','),
+            frete: form.frete ? form.frete.toFixed(2).replace('.',',') : '0,00',
+            total: total.toFixed(2).replace('.',','),
+            pagamento: pagamentoSelecionado.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            trocoPara: trocoPara || 'N/A',
+        };
 
         try {
-            const payload = {
-                token: API_TOKEN,
-                atendimentos: [
-                    {
-                        uid: crypto.randomUUID(),
-                        datahora: new Date().toISOString().slice(0, 19).replace("T", " "),
-                        status: "aberto",
-                        empresa: {
-                            id: "52.764.726/0001-02",
-                            razaosocial: "SUMMER ICE SORVETES LTDA"
-                        },
-                        cliente: {
-                            doc: "",
-                            nome: form.nome,
-                            email: "",
-                            telefone: "",
-                            endereco: {
-                                cep: form.cep.replace("-", ""),
-                                logradouro: form.rua,
-                                numero: form.numero,
-                                complemento: form.complemento,
-                                bairro: form.bairro,
-                                cidade: form.cidade,
-                                estado: form.estado
-                            }
-                        },
-                        produtos: carrinho.map((item) => ({
-                            id: item.id.toString(),
-                            descricao: item.nome,
-                            qtde: 1,
-                            unitario: item.valor,
-                            total: item.valor,
-                            opcionais: []
-                        })),
-                        pagamentos: [
-                            {
-                                id: "00000000",
-                                descricao: pagamentoSelecionado,
-                                valor: total,
-                                status: "pago",
-                                carteira: pagamentoSelecionado
-                            }
-                        ],
-                        entregar: tipoEntrega === "entrega" ? "true" : "false",
-                        retirar: tipoEntrega === "retirada" ? "true" : "false",
-                        observacoes: ["Pedido via sistema"]
-                    }
-                ]
-            };
-
-
-            console.log("📦 Enviando payload para backend:", payload);
-
-            const res = await fetch(`${API_URL}/enviar-pedido`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
+            await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pedidoParaPlanilha),
             });
+            
+            toast.success("Pedido registrado com sucesso!");
 
-            if (!res.ok) {
-                const error = await res.json();
-                toast.error(`Erro ao enviar pedido: ${error.detail || "Erro desconhecido"}`);
-                // return
-            } else {
-                const data = await res.json();
-                console.log("✅ Pedido registrado na API:", data);
-                toast.success("Pedido registrado com sucesso!");
+            let mensagem = `🍽️ *Novo Pedido Recebido!* 🍽️\n\n`;
+            mensagem += `*ID do Pedido:* ${pedidoParaPlanilha.id}\n`;
+            mensagem += `*Cliente:* ${form.nome}\n`;
+            mensagem += `*Entrega:* ${tipoEntrega === "entrega" ? "Entrega em domicílio 🏡" : "Retirada na loja 🏪"}\n\n`;
+            mensagem += `*Itens do Pedido:*\n`;
+            produtosAgrupados.forEach((item) => {
+                mensagem += `• ${item.quantidade}x ${item.Nome} — *R$ ${item.Preço.toFixed(2).replace(".", ",")}*\n`;
+            });
+            mensagem += `\n*Subtotal:* R$ ${subtotal.toFixed(2).replace(".", ",")}\n`;
+            if (tipoEntrega === "entrega" && form.frete) {
+                mensagem += `*Frete:* R$ ${form.frete.toFixed(2).replace(".", ",")}\n`;
             }
+            mensagem += `*Total:* *R$ ${total.toFixed(2).replace(".", ",")}*\n`;
+            if (pagamentoSelecionado === "dinheiro" && trocoPara) {
+                 mensagem += `*Troco para:* ${trocoPara}\n`;
+            }
+            if (tipoEntrega === "entrega") {
+                mensagem += `\n*Endereço de Entrega:*\n${enderecoCompleto}\n`;
+                if (form.complemento) mensagem += `*Complemento:* ${form.complemento}\n`;
+            }
+            mensagem += `*Forma de Pagamento:* ${pedidoParaPlanilha.pagamento}\n`;
+            if (pagamentoSelecionado === "pix") {
+                mensagem += `\n*Chave PIX (Copia e Cola):*\n\`\`\`${PIX_CODIGO}\`\`\`\n`;
+                mensagem += `\n*Realize o pagamento e envie o comprovante por aqui!*\n`;
+            }
+            mensagem += `\n🎉 *Agradecemos a preferência!*`;
 
-            // Limpar o carrinho
             esvaziarCarrinho();
-
-            // Redirecionar
             navigate("/pedido-confirmado");
-
-            // Abrir WhatsApp
             const telefoneLoja = "5545991010879";
             const url = `https://api.whatsapp.com/send/?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`;
             window.open(url, "_blank");
 
         } catch (err) {
-            console.error("Erro ao enviar para backend:", err);
-            toast.error("Falha ao registrar pedido. Tente novamente.");
+            console.error("Erro ao enviar pedido para o Apps Script:", err);
+            toast.error("Ops! Tivemos um problema ao registrar seu pedido. Tente novamente.");
+        } finally {
+            setIsSubmitting(false);
         }
-
-
-
     };
 
     return (
@@ -295,8 +210,7 @@ export default function FinalizarPedido() {
             <motion.div
                 className="text-center mb-16"
                 initial={{ opacity: 0, y: -30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
             >
                 <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-[#1a1a1a] mb-4">
@@ -313,12 +227,10 @@ export default function FinalizarPedido() {
                 <motion.div
                     className="bg-white p-8 rounded-3xl shadow-2xl space-y-8"
                     initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.1 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
                     <h2 className="text-xl font-bold text-[#561c1c]">Entrega ou Retirada?</h2>
-                    {/* Seletor de Retirada ou Entrega */}
                     <div className="flex flex-col gap-4">
                         {[
                             { id: "retirada", titulo: "Retirada", descricao: "Retire na loja" },
@@ -327,11 +239,9 @@ export default function FinalizarPedido() {
                             <div
                                 key={opcao.id}
                                 onClick={() => setTipoEntrega(opcao.id)}
-                                className={`cursor-pointer transition transform hover:scale-105 border-2 rounded-lg bg-white p-4 flex items-center gap-4 ${tipoEntrega === opcao.id ? "border-[#561c1c] bg-red-50" : "border-gray-200"
-                                    }`}
+                                className={`cursor-pointer transition transform hover:scale-105 border-2 rounded-lg bg-white p-4 flex items-center gap-4 ${tipoEntrega === opcao.id ? "border-[#561c1c] bg-red-50" : "border-gray-200"}`}
                             >
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${tipoEntrega === opcao.id ? "border-[#561c1c]" : "border-gray-400"
-                                    }`}>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${tipoEntrega === opcao.id ? "border-[#561c1c]" : "border-gray-400"}`}>
                                     {tipoEntrega === opcao.id && <div className="w-2.5 h-2.5 bg-[#561c1c] rounded-full" />}
                                 </div>
                                 <div>
@@ -342,43 +252,32 @@ export default function FinalizarPedido() {
                         ))}
                     </div>
 
-                    {/* Formulário */}
                     <div className="grid gap-3 mt-8">
-                        <input type="text" name="nome" placeholder="Nome completo" value={form.nome} onChange={handleChange} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c]transition" />
+                        <input type="text" name="nome" placeholder="Nome completo" value={form.nome} onChange={handleChange} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition" />
                         {tipoEntrega === "entrega" && (
-                            <>
-                                <input type="text" name="cep" placeholder="CEP" value={form.cep} onChange={handleChange} onBlur={buscarEndereco} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition" />
+                            <motion.div className="grid gap-3" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                                <input type="text" name="cep" placeholder="CEP" value={form.cep} onChange={handleChange} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition" maxLength="9" />
                                 <input type="text" name="rua" placeholder="Rua" value={form.rua} onChange={handleChange} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition" />
                                 <input type="text" name="bairro" placeholder="Bairro" value={form.bairro} onChange={handleChange} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition" />
                                 <input type="text" name="numero" placeholder="Número" value={form.numero} onChange={handleChange} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition" />
-                                <input type="text" name="complemento" placeholder="Complemento" value={form.complemento} onChange={handleChange} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition" />
-                            </>
+                                <input type="text" name="complemento" placeholder="Complemento (Opcional)" value={form.complemento} onChange={handleChange} className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition" />
+                            </motion.div>
                         )}
                     </div>
-
-                    {/* Frete */}
-                    {tipoEntrega === "entrega" && form.frete !== null && (
-                        <div className="text-end text-lg font-medium mt-4">
-                            Frete: <span className="font-bold">R$ {form.frete.toFixed(2).replace(".", ",")}</span>
-                        </div>
-                    )}
                 </motion.div>
 
                 {/* Forma de Pagamento */}
                 <motion.div
                     className="bg-white p-6 rounded-3xl shadow-2xl space-y-8"
                     initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
                 >
                     <h2 className="text-xl font-bold text-[#561c1c]">Forma de Pagamento</h2>
                     <div className="flex flex-col gap-4">
                         {[
-                            { id: "pix", titulo: "Pix" },
-                            { id: "dinheiro", titulo: "Dinheiro" },
-                            { id: "cartao_credito", titulo: "Cartão Crédito" },
-                            { id: "cartao_debito", titulo: "Cartão Débito" },
+                            { id: "pix", titulo: "Pix" }, { id: "dinheiro", titulo: "Dinheiro" },
+                            { id: "cartao_credito", titulo: "Cartão Crédito" }, { id: "cartao_debito", titulo: "Cartão Débito" },
                             { id: "alimentacao", titulo: "Alimentação (Alelo, VR)" },
                         ].map((opcao) => (
                             <div
@@ -388,51 +287,18 @@ export default function FinalizarPedido() {
                                     if (opcao.id === "pix") {
                                         try {
                                             await navigator.clipboard.writeText(PIX_CODIGO);
-                                            toast.success('Código PIX copiado!', {
-                                                icon: "✅",
-                                                style: {
-                                                    background: "#4ade80",  // fundo verde elegante
-                                                    color: "#ffffff",
-                                                    fontWeight: "600",
-                                                    fontSize: "14px",
-                                                    padding: "8px 16px",
-                                                    borderRadius: "8px",
-                                                    boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-                                                },
-                                            });
+                                            toast.success('Código PIX copiado para a área de transferência!');
                                         } catch (error) {
                                             console.error("Erro ao copiar PIX:", error);
-                                            toast.error('Erro ao copiar código!', {
-                                                icon: "⚠️",
-                                                style: {
-                                                    background: "#f87171",
-                                                    color: "#ffffff",
-                                                    fontWeight: "600",
-                                                    fontSize: "14px",
-                                                    padding: "8px 16px",
-                                                    borderRadius: "8px",
-                                                    boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-                                                },
-                                            });
+                                            toast.error('Não foi possível copiar o código PIX.');
                                         }
                                     }
                                 }}
-
-                                className={`cursor-pointer flex-1 border-2 rounded-lg p-4 text-center font-semibold transition transform hover:scale-105 ${pagamentoSelecionado === opcao.id
-                                    ? "border-[#561c1c] "
-                                    : "border-gray-200"
-                                    }`}
+                                className={`cursor-pointer flex-1 border-2 rounded-lg p-4 font-semibold transition transform hover:scale-105 ${pagamentoSelecionado === opcao.id ? "border-[#561c1c]" : "border-gray-200"}`}
                             >
-                                <div className="flex gap-2">
-                                    <div
-                                        className={`w-4 h-4 mt-1 rounded-full border-2 flex items-center justify-center ${pagamentoSelecionado === opcao.id
-                                            ? "border-[#561c1c]"
-                                            : "border-gray-400"
-                                            }`}
-                                    >
-                                        {pagamentoSelecionado === opcao.id && (
-                                            <div className="w-2 h-2 bg-[#561c1c] rounded-full" />
-                                        )}
+                                <div className="flex gap-2 items-center">
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${pagamentoSelecionado === opcao.id ? "border-[#561c1c]" : "border-gray-400"}`}>
+                                        {pagamentoSelecionado === opcao.id && <div className="w-2 h-2 bg-[#561c1c] rounded-full" />}
                                     </div>
                                     <span>{opcao.titulo}</span>
                                 </div>
@@ -440,71 +306,45 @@ export default function FinalizarPedido() {
                         ))}
                     </div>
                     {pagamentoSelecionado === "dinheiro" && (
-                        <input
-                            type="text"
-                            name="trocoPara"
-                            placeholder="Troco para quanto?"
-                            value={trocoPara}
+                        <motion.input
+                            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                            type="text" name="trocoPara" placeholder="Troco para quanto?" value={trocoPara}
                             onChange={(e) => setTrocoPara(formatarMoeda(e.target.value))}
                             className="border border-gray-300 rounded-xl p-3 w-full focus:outline-none focus:border-[#561c1c] transition"
                         />
                     )}
                 </motion.div>
 
-
                 {/* Resumo do Pedido */}
                 <motion.div
-                    className="bg-white p-8 rounded-3xl shadow-2xl space-y-8"
+                    className="bg-white p-8 rounded-3xl shadow-2xl space-y-6 h-fit sticky top-24"
                     initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
                 >
                     <h2 className="text-2xl font-bold text-[#561c1c] mb-4">Resumo do Pedido</h2>
-
-                    {carrinho.length === 0 ? (
-                        <p className="text-gray-600">Seu carrinho está vazio 😥</p>
-                    ) : (
-                        <div className="space-y-4">
-                            {carrinho.map((produto, index) => (
-                                <div key={index} className="flex justify-between items-center border-b pb-2">
-                                    <div className="flex items-center gap-2">
-                                        <img src={produto.imagem} alt={produto.nome} className="w-12 h-12 object-contain rounded" />
-                                        <span className="font-semibold text-gray-800">{produto.nome}</span>
-                                    </div>
-                                    <span className="text-gray-600">R$ {produto.valor.toFixed(2).replace(".", ",")}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Totais */}
-                    <div className="text-right mt-6 space-y-2">
-                        <p className="text-lg font-bold text-[#561c1c]">Subtotal: R$ {subtotal.toFixed(2)}</p>
-                        {tipoEntrega === "entrega" && form.frete && (
-                            <p className="text-lg font-bold text-[#561c1c]">Frete: R$ {form.frete.toFixed(2)}</p>
-                        )}
-                        <p className="text-2xl font-bold text-[#561c1c]">Total: R$ {total.toFixed(2)}</p>
+                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
+                        {produtosAgrupados.length > 0 ? produtosAgrupados.map((p) => (
+                            <div key={p.ID} className="flex justify-between items-center border-b pb-2">
+                                <span className="font-semibold text-gray-800">{p.quantidade}x {p.Nome}</span>
+                                <span className="text-gray-600">R$ {(p.Preço * p.quantidade).toFixed(2).replace(".", ",")}</span>
+                            </div>
+                        )) : <p className="text-gray-600 text-center">Seu carrinho está vazio 😥</p>}
                     </div>
-
-                    {/* Botão Confirmar */}
+                    <div className="text-right mt-6 space-y-2 border-t pt-4">
+                        <p className="text-lg font-medium text-gray-700">Subtotal: R$ {subtotal.toFixed(2).replace(".", ",")}</p>
+                        {tipoEntrega === "entrega" && form.frete !== null && (
+                            <p className="text-lg font-medium text-gray-700">Frete: R$ {form.frete.toFixed(2).replace(".", ",")}</p>
+                        )}
+                        <p className="text-2xl font-bold text-[#561c1c]">Total: R$ {total.toFixed(2).replace(".", ",")}</p>
+                    </div>
                     <button
                         onClick={handleConfirmarPedido}
-                        className={`w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-full text-lg shadow-md transition-all ${(!tipoEntrega || !form.nome.trim() || (tipoEntrega === "entrega" && (!camposObrigatoriosPreenchidos || form.frete === null)) || !pagamentoSelecionado)
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                            }`}
-                        disabled={
-                            !tipoEntrega ||
-                            !form.nome.trim() ||
-                            (tipoEntrega === "entrega" && (!camposObrigatoriosPreenchidos || form.frete === null)) ||
-                            !pagamentoSelecionado
-                        }
+                        disabled={!isFormValid || isSubmitting}
+                        className={`w-full mt-6 bg-red-600 text-white font-bold py-4 rounded-full text-lg shadow-md transition-all ${!isFormValid || isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-red-700"}`}
                     >
-                        Confirmar Pedido
+                        {isSubmitting ? 'Enviando...' : 'Confirmar Pedido'}
                     </button>
-
-                    {/* Link Voltar */}
                     <Link to="/carrinho" className="block mt-4 text-center text-red-600 hover:underline">
                         Voltar para o Carrinho
                     </Link>
@@ -512,4 +352,4 @@ export default function FinalizarPedido() {
             </div>
         </section>
     );
-}      
+}
